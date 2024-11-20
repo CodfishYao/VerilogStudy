@@ -1,0 +1,48 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "VerilogToVcd",
+            "type": "shell",
+            "command": "DelOldFiles.ps1",
+            //"if(Test-Path -Path ${fileDirname}/wave.vvp){Remove-Item ${fileDirname}/wave.vvp}",
+            "args": [ ] //["${fileDirname}\\wave.vvp"]
+        },/*
+        {
+            "label": "second",
+            "command": "if (Test-Path -Path ${fileDirname}/wave.vcd)",
+            "type": "shell",
+            //"if (Test-Path -Path ${fileDirname}/wave.vcd) {Remove-Item ${fileDirname}/wave.vcd}",
+            "args": ["Remove-Item ${fileDirname}\\wave.vcd"], //["${fileDirname}/wave.vcd"],
+            //"dependsOrder": "sequence",
+            //"dependsOn": 
+             //   "VerilogToVcd"
+            
+        },*/
+        {
+            "label": "third",
+            "type": "shell",
+            "command": "iverilog",
+            //"dependsOrder": "sequence",
+            "args": ["-o wave.vvp ${fileDirname}/testbench.v ${file}"], 
+            "dependsOn": 
+                ["VerilogToVcd"]
+            
+        },
+        {
+            "label": "fourth",
+            "type": "shell",
+            "command": "vvp",
+            "args": ["${fileDirname}/wave.vvp"], 
+            //"dependsOrder": "sequence",
+            "dependsOn": 
+                ["third"]
+            
+        }
+    ],
+    "presentation": {
+        "panel": "new" //默认为“shared“
+    }
+}

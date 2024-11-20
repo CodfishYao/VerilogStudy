@@ -1,0 +1,90 @@
+$date
+	Tue Nov 05 08:57:12 2024
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ns
+$end
+$scope module hw2q3_tb $end
+$var wire 10 ! bcd_out [9:0] $end
+$var reg 8 " bin_in [7:0] $end
+$scope module u3 $end
+$var wire 8 # bin_in [7:0] $end
+$var parameter 8 $ hunderd $end
+$var parameter 8 % ten $end
+$var reg 10 & bcd_out [9:0] $end
+$var reg 8 ' bin_mid [7:0] $end
+$var reg 8 ( bin_reg [7:0] $end
+$var reg 2 ) hunderds [1:0] $end
+$var reg 4 * tens [3:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b10100000 %
+b11001000 $
+$end
+#0
+$dumpvars
+b101 *
+b10 )
+b11111111 (
+b101 '
+b1001010101 &
+b11111111 #
+b11111111 "
+b1001010101 !
+$end
+#10
+b1000000000 !
+b1000000000 &
+b0 *
+b0 '
+b11001000 (
+b11001000 "
+b11001000 #
+#20
+b110011001 !
+b110011001 &
+b1001 *
+b1 )
+b1001 '
+b11000111 (
+b11000111 "
+b11000111 #
+#30
+b100000001 !
+b100000001 &
+b0 *
+b1 '
+b1100101 (
+b1100101 "
+b1100101 #
+#40
+b10011001 !
+b10011001 &
+b1001 *
+b0 )
+b1001 '
+b1100011 (
+b1100011 "
+b1100011 #
+#50
+b1 !
+b1 &
+b0 *
+b1 '
+b1 (
+b1 "
+b1 #
+#60
+b0 !
+b0 &
+b0 '
+b0 (
+b0 "
+b0 #
+#160
