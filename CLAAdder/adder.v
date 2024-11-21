@@ -5,10 +5,12 @@ module add_tc_16_16(
     );
     //reg [32:0] Sum;
     wire [3:0] G, P;
+    assign G[3:2] = 2'b00;
+    assign P[3:2] = 2'b00;
     Adder_16bit u_Adder_16bit_1(
                     .A   	( A[15:0]   ),
                     .B   	( B[15:0]   ),
-                    .Cin 	( Cin       ),
+                    .Cin 	( 1'b0      ),
                     .S   	( Sum[15:0] ),
                     .Go  	( G[0]      ),
                     .Po  	( P[0]      )
@@ -16,7 +18,7 @@ module add_tc_16_16(
     Adder_16bit u_Adder_16bit_2(
                     .A   	( A[31:16]  ),
                     .B   	( B[31:16]  ),
-                    .Cin 	(           ),
+                    .Cin 	( 1'b0      ),
                     .S   	( Sum[31:16]),
                     .Go  	( G[1]      ),
                     .Po  	( P[1]      )
@@ -24,12 +26,12 @@ module add_tc_16_16(
     CLA_4bit u_CLA_4bit(
                     .P   	( P         ),
                     .G   	( G         ),
-                    .Cin 	( Cin       ),
+                    .Cin 	( 1'b0      ),
                     .Ci  	(           ),
                     .Po  	(           ),
                     .Go  	(           )
                 );
-    assign Sum[32] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & Cin);        
+    assign Sum[32] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & 0);        
 endmodule
 //16bit adder
 module Adder_16bit(
