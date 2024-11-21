@@ -9,11 +9,11 @@ There are some verilog projects, which are the studying codes of me when I'm stu
 
 **NOW There are below projects:**
 
-1. First1Detector\t向量前导1检测器
+1. First1Detector         向量前导1检测器
 2. SpecificStreamDetector 序列检测器
-3. toBCD 二进制转BCD码
-4. Timer 跑表
-5. CLAAdder 快速加法器
+3. toBCD                  二进制转BCD码
+4. Timer                  跑表
+5. CLAAdder               快速加法器
 
 **Tips:**
 
