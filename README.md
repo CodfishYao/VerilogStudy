@@ -3,12 +3,13 @@
 ***HELLO！***
 ***你好！***
 
-这里是一些Verilog工程，包括我再硕士学位学习期间的学习内容。
 There are some verilog projects, which are the studying codes of me when I'm studying for a Master degree.
+
+这里是一些Verilog工程，包括我在硕士学位学习期间的学习内容。
 
 **NOW There are below projects:**
 
-1. First1Detector 向量前导1检测器
+1. First1Detector\t向量前导1检测器
 2. SpecificStreamDetector 序列检测器
 3. toBCD 二进制转BCD码
 4. Timer 跑表
