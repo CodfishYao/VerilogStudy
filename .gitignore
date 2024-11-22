@@ -1,4 +1,10 @@
 *.vvp
 *.vcd
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
 
 .vscode/
