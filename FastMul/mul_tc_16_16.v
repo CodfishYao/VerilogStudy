@@ -44,9 +44,39 @@ module mul_tc_16_16(
     assign PP1 = (PP[6][16] == 1'b1) ? {3'b1, PP[6]} : {3'b0, PP[6]};
     wire [17:0] PP7;
     assign PP1 = (PP[7][16] == 1'b1) ? {1'b1, PP[7]} : {1'b0, PP[7]};
-    //
+    //第一层的和与进位
+    wire [29:0] S1;
+    wire [28:0] C1;
+    wire [25:0] S2;
+    wire [22:0] C2;
+    //Wallace树的第一层全加器和半加器
 
+    //第二层的和与进位
+    wire [28:0] S3;
+    wire [27:0] C3;
+    wire [22:0] S4;
+    wire [18:0] C4;
+    //Wallace树的第二层全加器和半加器
 
+    //第三层的和与进位
+    wire [27:0] S5;
+    wire [26:0] C5;
+    //Wallace树的第三层全加器和半加器
+
+    //第四层的和与进位
+    wire [26:0] S6;
+    wire [25:0] C6;
+    //Wallace树的最后一层行波进位加法器
+
+    //给输出寄存器赋值
+    always @(*)begin
+        product[1:0] = PP0[1:0];
+        product[2]   = S1 [0];
+        product[3]   = S3 [0];
+        product[4]   = S5 [0];
+        product[5]   = S6 [0];
+        //product[31:6] = PP0[1:0];
+    end
 endmodule
 //生成部分积
 module generatePP(
