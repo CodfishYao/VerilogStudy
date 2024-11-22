@@ -6,5 +6,6 @@
 *.xls
 *.pptx
 *.ppt
+*.drawio
 
 .vscode/
