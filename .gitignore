@@ -7,5 +7,5 @@
 *.pptx
 *.ppt
 *.drawio
-
+*.drawio.bkp
 .vscode/
