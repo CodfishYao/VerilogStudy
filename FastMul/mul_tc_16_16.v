@@ -3,7 +3,30 @@ module mul_tc_16_16(
         input [15:0] b,
         output[31:0] product
     );
-    reg [2:0] booth [7:0];
+
+    wire [7:0] booth0;
+    wire [7:0] booth1;
+    wire [7:0] booth2;
+    wire [16:0] b0;
+    assign b0 = {b,1'b0};//乘数后补一个0
+    //reg [16:0] PP1,PP2,PP3,PP4,PP5,PP6,PP7,PP8;
+    wire [16:0] PP [7:0];//存储部分积的网络
+    //reg [7:0] PPreg [16:0];
+    //生成所有的部分积
+    genvar i;
+    generate
+        for(i = 0; i < 8 ;i = i + 1) begin
+            toBooth u_toBooth(
+                        .multiplicand 	( b0[2*(i+1):2*i]  ),
+                        .booth        	( {booth2[i],booth1[i],booth0[i]} )
+                    );
+            generatePP u_generatePP(
+                           .A(a),
+                           .booth({booth2[i],booth1[i],booth0[i]}),
+                           .PP(PP[i])
+                       );
+        end
+    endgenerate
 
 endmodule
 //生成部分积
