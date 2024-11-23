@@ -50,7 +50,64 @@ module mul_tc_16_16(
     wire [25:0] S2;
     wire [22:0] C2;
     //Wallace树的第一层全加器和半加器
-
+    assign S2[1:0] = PP3[1:0];
+    genvar firstHACnt;
+    //半加器
+    generate
+        for(firstHACnt = 0; firstHACnt < 2; firstHACnt = firstHACnt + 1) begin
+            HA u_HA_0(
+                   .A(PP0[firstHACnt + 2]),
+                   .B(PP1[firstHACnt]),
+                   .S(S1[firstHACnt]),
+                   .C(C1[firstHACnt])
+               );
+            HA u_HA_1(
+                   .A(PP3[firstHACnt + 2]),
+                   .B(PP4[firstHACnt]),
+                   .S(S2[firstHACnt + 2]),
+                   .C(C2[firstHACnt])
+               );
+        end
+    endgenerate
+    //全加器
+    genvar firstFACnt0;
+    generate
+        for(firstFACnt0 = 0; firstFACnt0 < 27; firstFACnt0 = firstFACnt0 +1) begin
+            FA u_FA_0(
+                   .A ( PP0[firstFACnt0 + 4] ),
+                   .B ( PP1[firstFACnt0 + 2] ),
+                   .Ci( PP2[firstFACnt0    ] ),
+                   .S ( S1 [firstFACnt0 + 2] ),
+                   .C ( C1 [firstFACnt0 + 2] )
+               );
+        end
+    endgenerate
+    FA u_FA_last_0(
+           .A  ( PP1[31] ),
+           .B  ( PP2[29] ),
+           .Ci ( PP3[27] ),
+           .S  ( S1 [29] ),
+           .C  ( )
+       );
+    genvar firstFACnt1;
+    generate
+        for(firstFACnt1 = 0; firstFACnt1 < 21; firstFACnt1 = firstFACnt1 +1) begin
+            FA u_FA_1(
+                   .A ( PP3[firstFACnt1 + 4] ),
+                   .B ( PP4[firstFACnt1 + 2] ),
+                   .Ci( PP5[firstFACnt1    ] ),
+                   .S ( S1 [firstFACnt1 + 2] ),
+                   .C ( C1 [firstFACnt1 + 2] )
+               );
+        end
+    endgenerate
+    FA u_FA_last_1(
+           .A  ( PP4[25] ),
+           .B  ( PP2[23] ),
+           .Ci ( PP3[21] ),
+           .S  ( S2 [25] ),
+           .C  ( )
+       );
     //第二层的和与进位
     wire [28:0] S3;
     wire [27:0] C3;
@@ -69,7 +126,7 @@ module mul_tc_16_16(
     //Wallace树的最后一层行波进位加法器
 
     //给输出寄存器赋值
-    always @(*)begin
+    always @(*) begin
         product[1:0] = PP0[1:0];
         product[2]   = S1 [0];
         product[3]   = S3 [0];
