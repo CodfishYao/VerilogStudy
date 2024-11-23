@@ -29,21 +29,21 @@ module mul_tc_16_16(
     endgenerate
     //将部分积进行符号位扩展
     wire [31:0] PP0;
-    assign PP1 = (PP[0][16] == 1'b1) ? {15'b1,PP[0]} : {15'b0,PP[0]};
+    assign PP0 = (PP[0][16] == 1'b1) ? {15'b1,PP[0]} : {15'b0,PP[0]};
     wire [29:0] PP1;
     assign PP1 = (PP[1][16] == 1'b1) ? {13'b1,PP[1]} : {13'b0,PP[1]};
     wire [27:0] PP2;
-    assign PP1 = (PP[2][16] == 1'b1) ? {11'b1,PP[2]} : {11'b0,PP[2]};
+    assign PP2 = (PP[2][16] == 1'b1) ? {11'b1,PP[2]} : {11'b0,PP[2]};
     wire [25:0] PP3;
-    assign PP1 = (PP[3][16] == 1'b1) ? {9'b1, PP[3]} : {9'b0, PP[3]};
+    assign PP3 = (PP[3][16] == 1'b1) ? {9'b1, PP[3]} : {9'b0, PP[3]};
     wire [23:0] PP4;
-    assign PP1 = (PP[4][16] == 1'b1) ? {7'b1, PP[4]} : {7'b0, PP[4]};
+    assign PP4 = (PP[4][16] == 1'b1) ? {7'b1, PP[4]} : {7'b0, PP[4]};
     wire [21:0] PP5;
-    assign PP1 = (PP[5][16] == 1'b1) ? {5'b1, PP[5]} : {5'b0, PP[5]};
+    assign PP5 = (PP[5][16] == 1'b1) ? {5'b1, PP[5]} : {5'b0, PP[5]};
     wire [19:0] PP6;
-    assign PP1 = (PP[6][16] == 1'b1) ? {3'b1, PP[6]} : {3'b0, PP[6]};
+    assign PP6 = (PP[6][16] == 1'b1) ? {3'b1, PP[6]} : {3'b0, PP[6]};
     wire [17:0] PP7;
-    assign PP1 = (PP[7][16] == 1'b1) ? {1'b1, PP[7]} : {1'b0, PP[7]};
+    assign PP7 = (PP[7][16] == 1'b1) ? {1'b1, PP[7]} : {1'b0, PP[7]};
     //第一层的和与进位
     wire [29:0] S1;
     wire [28:0] C1;
