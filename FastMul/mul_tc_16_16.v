@@ -28,22 +28,30 @@ module mul_tc_16_16(
         end
     endgenerate
     //将部分积进行符号位扩展
+    parameter expand0 = 15'b111_1111_1111_1111;
+    parameter expand1 = 13'b1_1111_1111_1111;
+    parameter expand2 = 11'b111_1111_1111;
+    parameter expand3 =  9'b1_1111_1111;
+    parameter expand4 =  7'b111_1111;
+    parameter expand5 =  5'b1_1111;
+    parameter expand6 =  3'b111;
+    parameter expand7 =  1'b1;
     wire [31:0] PP0;
-    assign PP0 = (PP[0][16] == 1'b1) ? {15'b1,PP[0]} : {15'b0,PP[0]};
+    assign PP0 = (PP[0][16] == 1'b1) ? {expand0,PP[0]} : {15'b0,PP[0]};
     wire [29:0] PP1;
-    assign PP1 = (PP[1][16] == 1'b1) ? {13'b1,PP[1]} : {13'b0,PP[1]};
+    assign PP1 = (PP[1][16] == 1'b1) ? {expand1,PP[1]} : {13'b0,PP[1]};
     wire [27:0] PP2;
-    assign PP2 = (PP[2][16] == 1'b1) ? {11'b1,PP[2]} : {11'b0,PP[2]};
+    assign PP2 = (PP[2][16] == 1'b1) ? {expand2,PP[2]} : {11'b0,PP[2]};
     wire [25:0] PP3;
-    assign PP3 = (PP[3][16] == 1'b1) ? {9'b1, PP[3]} : {9'b0, PP[3]};
+    assign PP3 = (PP[3][16] == 1'b1) ? {expand3, PP[3]} : {9'b0, PP[3]};
     wire [23:0] PP4;
-    assign PP4 = (PP[4][16] == 1'b1) ? {7'b1, PP[4]} : {7'b0, PP[4]};
+    assign PP4 = (PP[4][16] == 1'b1) ? {expand4, PP[4]} : {7'b0, PP[4]};
     wire [21:0] PP5;
-    assign PP5 = (PP[5][16] == 1'b1) ? {5'b1, PP[5]} : {5'b0, PP[5]};
+    assign PP5 = (PP[5][16] == 1'b1) ? {expand5, PP[5]} : {5'b0, PP[5]};
     wire [19:0] PP6;
-    assign PP6 = (PP[6][16] == 1'b1) ? {3'b1, PP[6]} : {3'b0, PP[6]};
+    assign PP6 = (PP[6][16] == 1'b1) ? {expand6, PP[6]} : {3'b0, PP[6]};
     wire [17:0] PP7;
-    assign PP7 = (PP[7][16] == 1'b1) ? {1'b1, PP[7]} : {1'b0, PP[7]};
+    assign PP7 = (PP[7][16] == 1'b1) ? {expand7, PP[7]} : {1'b0, PP[7]};
     //第一层的和与进位
     wire [29:0] S1;
     wire [28:0] C1;
@@ -82,12 +90,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_firstFALast0(
-           .A  ( PP1[31] ),
-           .B  ( PP2[29] ),
-           .Ci ( PP3[27] ),
-           .S  ( S1 [29] ),
-           .C  ( )
+    threeXOR u_firstFALast0(
+           .A  ( PP0[31] ),
+           .B  ( PP1[29] ),
+           .Ci ( PP2[27] ),
+           .S  ( S1 [29] )
        );
     genvar firstFACnt1;
     generate
@@ -101,12 +108,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_firstFALast1(
-           .A  ( PP4[25] ),
-           .B  ( PP2[23] ),
-           .Ci ( PP3[21] ),
-           .S  ( S2 [25] ),
-           .C  ( )
+    threeXOR u_firstFALast1(
+           .A  ( PP3[25] ),
+           .B  ( PP4[23] ),
+           .Ci ( PP5[21] ),
+           .S  ( S2 [25] )
        );
     //第二层的和与进位
     wire [28:0] S3;
@@ -153,12 +159,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_secondFAlast0(
+    threeXOR u_secondFAlast0(
            .A  	( S1 [29] ),
            .B  	( C1 [28] ),
            .Ci 	( S2 [25] ),
-           .S  	( S3 [28]),
-           .C  	(    )
+           .S  	( S3 [28])
        );
     genvar secondFACnt1;
     generate
@@ -172,12 +177,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_secondFAlast1(
+    threeXOR u_secondFAlast1(
            .A  	( C2 [22] ),
            .B  	( PP6[19] ),
            .Ci 	( PP7[17] ),
-           .S  	( S4 [22]),
-           .C  	(    )
+           .S  	( S4 [22])
        );
     //第三层的和与进位
     wire [27:0] S5;
@@ -186,7 +190,7 @@ module mul_tc_16_16(
     //半加器
     genvar thirdHACnt0;
     generate
-        for(thirdHACnt0 = 0; thirdHACnt0 < 3; thirdHACnt0 = thirdHACnt0 + 1) begin
+        for(thirdHACnt0 = 0; thirdHACnt0 < 5; thirdHACnt0 = thirdHACnt0 + 1) begin
             HA u_secondHA0(
                    .A 	( S3[thirdHACnt0 + 1]  ),
                    .B 	( C3[thirdHACnt0    ]  ),
@@ -208,12 +212,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_thirdFAlast0(
+    threeXOR u_thirdFAlast0(
            .A  	( S3 [28] ),
            .B  	( C3 [27] ),
            .Ci 	( S4 [22] ),
-           .S  	( S5 [27] ),
-           .C  	(    )
+           .S  	( S5 [27] )
        );
     //第四层的和与进位
     wire [26:0] S6;
@@ -244,12 +247,11 @@ module mul_tc_16_16(
                );
         end
     endgenerate
-    FA u_fourthFAlast0(
+    threeXOR u_fourthFAlast0(
            .A  	( S5 [27] ),
            .B  	( C5 [26] ),
            .Ci 	( C4 [18] ),
-           .S  	( S6 [26] ),
-           .C  	(    )
+           .S  	( S6 [26] )
        );
     //Wallace树的最后一层行波进位加法器
     wire [25:0] sum = S6[26:1] + C6[25:0];
@@ -328,6 +330,15 @@ module toBooth(
                 booth = 3'b000;
         endcase
     end
+endmodule
+//不输出进位的全加器
+module threeXOR(
+        input A,
+        input B,
+        input Ci,
+        output S
+    );
+    assign S = A ^ B ^ Ci;
 endmodule
 //全加器
 module FA(

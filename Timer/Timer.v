@@ -1,4 +1,4 @@
-module Timer(
+module stop_watch(
         input Clk,
         input rst_n,
         input Clear,
@@ -10,17 +10,17 @@ module Timer(
         output reg [3:0] sec_h,
         output reg [3:0] sec_l
     );
-    /*1MHz即1秒有1000_000个时钟，
-    故应该每1000000个时钟，
+    /*1MHz即1秒有100_0000个时钟，
+    故应该每1000_0000个时钟，
     增加1秒
     */
     //用于判断是否此时应该增加一秒
-    parameter addSec = 1000000;
+    parameter addSec = 100;//正常应该1000_0000
     reg [19:0] addSecCnt;
     //用于按钮消抖计时
-    parameter passShake = 10000;
-    reg [13:0] passSShakeCnt;
-    reg [13:0] passCShakeCnt;
+    parameter passShake = 1;//正常应该10_0000
+    reg [13:0] passSShakeCnt = 0;
+    reg [13:0] passCShakeCnt = 0;
     //是否要开始按钮按下后的计时
     //00-未操作 01-开始按下 11-按下 10-抬起
     reg[1:0] sBtnFlag, cBtnFlag;
@@ -35,8 +35,12 @@ module Timer(
     reg [5:0] sec, min;
     reg [6:0] hr;
     //更新寄存器中按钮状态
-    always @(posedge Clk or negedge rst_n) begin
+    always @(negedge Clk or negedge rst_n) begin
         if(!rst_n) begin
+            passSShakeCnt <= 0;
+            passCShakeCnt <= 0;
+            sBtnFlag <= 2'b00;
+            cBtnFlag <= 2'b00;
             sBtn_1 <= 1'b0;
             sBtn_2 <= 1'b0;
             cBtn_1 <= 1'b0;
@@ -146,12 +150,6 @@ module Timer(
                 hr <= 7'b0;
                 min <= 6'b0;
                 sec <= 6'b0;
-                hr_h <= 4'b0;
-                hr_l <= 4'b0;
-                min_h <= 4'b0;
-                min_l <= 4'b0;
-                sec_h <= 4'b0;
-                sec_l <= 4'b0;
             end
             else begin
                 //如果没有被清零是否处于暂停状态
@@ -189,29 +187,37 @@ module Timer(
             end
         end
     end
-    wire [3:0] hr_hw = hr_h;
-    wire [3:0] hr_lw = hr_h;
+    wire [3:0] hr_hw;
+    wire [3:0] hr_lw;
     toBCD u_toBCD_hr(
               .bin_in        	( hr ),
               .bcd_out_tens  	( hr_hw ),
               .bcd_out_units 	( hr_lw )
           );
-    wire [3:0] min_hw = min_h;
-    wire [3:0] min_lw = min_h;
+    wire [3:0] min_hw;
+    wire [3:0] min_lw;
     toBCD u_toBCD_min(
               .bin_in        	( min ),
               .bcd_out_tens  	( min_hw ),
               .bcd_out_units 	( min_lw )
           );
-    wire [3:0] sec_hw = sec_h;
-    wire [3:0] sec_lw = sec_h;
+    wire [3:0] sec_hw;
+    wire [3:0] sec_lw;
     toBCD u_toBCD_sec(
               .bin_in        	( sec ),
               .bcd_out_tens  	( sec_hw ),
               .bcd_out_units 	( sec_lw )
           );
+    always @(*) begin
+        hr_h <= hr_hw;
+        hr_l <= hr_lw;
+        min_h <= min_hw;
+        min_l <= min_lw;
+        sec_h <= sec_hw;
+        sec_l <= sec_lw;
+    end
 endmodule
-
+//
 module toBCD (
         input  [6:0]    bin_in,
         output  reg [3:0]   bcd_out_tens,
@@ -222,7 +228,7 @@ module toBCD (
     reg [6:0] bin_mid;
     reg [3:0] tens;
     //reg [3:0] units;
-    parameter ten     = 8'b10100000;
+    parameter ten     = 7'b1010000;
     always @(*) begin
         bin_reg = bin_in;
         bin_mid = bin_reg;

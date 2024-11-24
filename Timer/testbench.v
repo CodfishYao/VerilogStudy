@@ -14,6 +14,17 @@ module testbench();
     always begin
         #5 sys_rst = 1;
     end
+    initial begin
+        btn_clear = 0;
+        #1001 btn_clear = 1;
+        #1500 btn_clear = 0;
+        #2001 btn_start_stop = 1;
+        #2500 btn_start_stop = 0;
+        #3011 btn_start_stop = 1;
+        #3500 btn_start_stop = 0;
+        #4011 btn_start_stop = 1;
+        #4500 btn_start_stop = 0;
+    end
     //Instance
     // outports wire
     wire [3:0] 	hr_h;

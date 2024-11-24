@@ -17,8 +17,8 @@ module mul_tc_16_16_tb();
     integer seed2 = 2;
     //每10ns产生一个随机数
     initial begin
-        a = 0;
-        b = 0;
+        a = 16'b1011101010000110;
+        b = 16'b0111100101001101;
         repeat(10) begin
             #10
             a = $random(seed1)%16'b1111_1111_1111_1111;
