@@ -1,14 +1,22 @@
 module mul_tc_16_16(
+        //input clk,
         input [15:0] a,
         input [15:0] b,
         output reg [31:0] product
     );
-
+    reg [15:0] aReg, bReg;
+    always @(*) begin/*posedge clk*/
+        aReg = a;
+        bReg = b;
+    end
+    wire [15:0] bw, aw;
+    assign bw = bReg;
+    assign aw = aReg;
     wire [7:0] booth0;
     wire [7:0] booth1;
     wire [7:0] booth2;
     wire [16:0] b0;
-    assign b0 = {b,1'b0};//乘数后补一个0
+    assign b0 = {bw,1'b0};//乘数后补一个0
     //reg [16:0] PP1,PP2,PP3,PP4,PP5,PP6,PP7,PP8;
     wire [16:0] PP [7:0];//存储部分积的网络
     //reg [7:0] PPreg [16:0];
@@ -21,7 +29,7 @@ module mul_tc_16_16(
                         .booth        	( {booth2[i],booth1[i],booth0[i]} )
                     );
             generatePP u_generatePP(
-                           .A(a),
+                           .A(aw),
                            .booth({booth2[i],booth1[i],booth0[i]}),
                            .PP(PP[i])
                        );
@@ -256,7 +264,7 @@ module mul_tc_16_16(
     //Wallace树的最后一层行波进位加法器
     wire [25:0] sum = S6[26:1] + C6[25:0];
     //给输出寄存器赋值
-    always @(*) begin
+    always @(*) begin/*posedge clk*/
         product[1:0]  = PP0[1:0];
         product[2]    = S1 [0];
         product[3]    = S3 [0];

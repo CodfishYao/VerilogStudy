@@ -1,15 +1,21 @@
 module bsh_32(
+        input        clk,
         input [31:0] data_in,
         input        dir,
         input [4:0]  sh,
         output[31:0]  data_out
     );
+    //用来保证可以得到时序信息
     reg [31:0] data_out;
+    reg [31:0] data0;
+    always@(*)begin
+        data0 = data_in;
+    end
     wire [31:0] data1;
     assign data1 = sh[0]?
                         (dir?
-                            {data_in[0],data_in[31:1]}:
-                            {data_in[30:0],data_in[31]}):
+                            {data0[0],data0[31:1]}:
+                            {data0[30:0],data0[31]}):
                         data_in;
     wire [31:0] data2;
     assign data2 = sh[1]?
@@ -35,7 +41,7 @@ module bsh_32(
                             {data4[15:0],data4[31:16]}:
                             {data4[15:0],data4[31:16]}):
                         data4;
-    always @(data_in) begin
+    always @(*) begin
         data_out = data5;
     end
 endmodule

@@ -1,5 +1,5 @@
 `timescale 1ps/1ps
-module testbench();
+module testbench(input clk);
 
     parameter MAIN_FRE       = 100;
     reg       sys_clk        = 0;
@@ -34,17 +34,17 @@ module testbench();
     wire [3:0] 	sec_h;
     wire [3:0] 	sec_l;
     stop_watch u_stop_watch(
-              .Clk        	( sys_clk         ),
-              .rst_n      	( sys_rst         ),
-              .Clear      	( btn_clear       ),
-              .start_stop 	( btn_start_stop  ),
-              .hr_h       	( hr_h        ),
-              .hr_l       	( hr_l        ),
-              .min_h      	( min_h       ),
-              .min_l      	( min_l       ),
-              .sec_h      	( sec_h       ),
-              .sec_l      	( sec_l       )
-          );
+                   .Clk        	( sys_clk         ),
+                   .rst_n      	( sys_rst         ),
+                   .Clear      	( btn_clear       ),
+                   .start_stop 	( btn_start_stop  ),
+                   .hr_h       	( hr_h        ),
+                   .hr_l       	( hr_l        ),
+                   .min_h      	( min_h       ),
+                   .min_l      	( min_l       ),
+                   .sec_h      	( sec_h       ),
+                   .sec_l      	( sec_l       )
+               );
 
 
 

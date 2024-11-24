@@ -1,37 +1,51 @@
 module add_tc_16_16(
+        input clk,
         input [31:0] A,
         input [31:0] B,
         output [32:0] Sum
     );
-    //reg [32:0] Sum;
+    //纯组合逻辑，故应输入输出均加寄存器以查看时序信息
+    reg [32:0] Sum;
+    wire [32:0] SumOut;
+    always @(*)begin
+        Sum = SumOut;
+    end
+    reg [31:0] Ain, Bin;
+    always @(*)begin
+        Ain = A;
+        Bin = B;
+    end
+    wire [31:0] Aiin = Ain;
+    wire [31:0] Biin = Bin;
+    //
     wire [3:0] G, P;
     assign G[3:2] = 2'b00;
     assign P[3:2] = 2'b00;
     Adder_16bit u_Adder_16bit_1(
-                    .A   	( A[15:0]   ),
-                    .B   	( B[15:0]   ),
+                    .A   	( Aiin[15:0]   ),
+                    .B   	( Biin[15:0]   ),
                     .Cin 	( 1'b0      ),
-                    .S   	( Sum[15:0] ),
+                    .S   	( SumOut[15:0] ),
                     .Go  	( G[0]      ),
                     .Po  	( P[0]      )
                 );
     Adder_16bit u_Adder_16bit_2(
-                    .A   	( A[31:16]  ),
-                    .B   	( B[31:16]  ),
+                    .A   	( Aiin[31:16]  ),
+                    .B   	( Biin[31:16]  ),
                     .Cin 	( 1'b0      ),
-                    .S   	( Sum[31:16]),
+                    .S   	( SumOut[31:16]),
                     .Go  	( G[1]      ),
                     .Po  	( P[1]      )
                 );
     CLA_4bit u_CLA_4bit(
-                    .P   	( P         ),
-                    .G   	( G         ),
-                    .Cin 	( 1'b0      ),
-                    .Ci  	(           ),
-                    .Po  	(           ),
-                    .Go  	(           )
-                );
-    assign Sum[32] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & 0);        
+                 .P   	( P         ),
+                 .G   	( G         ),
+                 .Cin 	( 1'b0      ),
+                 .Ci  	(           ),
+                 .Po  	(           ),
+                 .Go  	(           )
+             );
+    assign SumOut[32] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & 0);
 endmodule
 //16bit adder
 module Adder_16bit(
@@ -77,13 +91,13 @@ module Adder_16bit(
                    .Po  	( P[3]     )
                );
     CLA_4bit u_CLA_4bit(
-                    .P   	( P        ),
-                    .G   	( G        ),
-                    .Cin 	( Cin      ),
-                    .Ci  	( C        ),
-                    .Po  	( Po       ),
-                    .Go  	( Go       )
-                );
+                 .P   	( P        ),
+                 .G   	( G        ),
+                 .Cin 	( Cin      ),
+                 .Ci  	( C        ),
+                 .Po  	( Po       ),
+                 .Go  	( Go       )
+             );
 endmodule
 //4bit adder
 module Adder_4bit(

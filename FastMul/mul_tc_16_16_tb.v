@@ -1,9 +1,11 @@
 module mul_tc_16_16_tb();
     // inports regs
     reg [15:0] a,b;
+    //reg clk = 1;
     // outports wire
     wire [31:0] 	product;
     mul_tc_16_16 u_mul_tc_16_16(
+                     //.clk       ( clk      ),
                      .a       	( a        ),
                      .b       	( b        ),
                      .product 	( product  )
