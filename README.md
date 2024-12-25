@@ -16,6 +16,9 @@ There are some verilog projects, which are the studying codes of me when I'm stu
 5. FastAdder              快速加法器
 6. FastMul                快速乘法器
 7. BarrelShifter          桶形移位器
+8. Sort                   数据排序
+9. Sqrt                   开方
+10. AHB_SRAM              AHB总线读写SRAM
 
 **Tips:**
 

@@ -1,0 +1,3 @@
+read_verilog -sv -formal -overwrite {workspace}/FFT/fft_256.v
+design -reset-vlog; proc;
+write_json {workspace}/netlist/fft_256.json
