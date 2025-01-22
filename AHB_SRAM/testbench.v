@@ -69,11 +69,8 @@ module sram_ctr_ahb_tb();
         #10
          hresetn <= 1'b1;
         htrans <= 2'b10;
-        #980
-         haddr <= 32'b0;
-        hwrite <= 1'b0;
     end
-    always @(negedge hready) begin
+    always @(posedge hclk) begin
         haddr <= haddr + 1;
         hwdata <= hwdata + 1;
     end
