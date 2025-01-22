@@ -26,8 +26,8 @@ module fft_256 (
     // enable control
     wire [8:0] en_ctrl;
     //par
-    parameter NUMBER_OF_TIMES_IN = 255 - 1;
-    parameter NUMBER_OF_TIMES_OUT = 256;
+    parameter NUMBER_OF_TIMES_IN = 9'b011111110;
+    parameter NUMBER_OF_TIMES_OUT = 9'b100000000;
     //自然序输入倒位序输出，使得顺序与预期一致
     //实部
 	assign x_re_mat[0][0] =  x_re_buf[0];
@@ -625,8 +625,8 @@ module fft_256 (
     assign y_im = y_im_out;
 
     // Wnr, multiplied by 0x2000
-    wire signed [15:0] factor_real[31:0];
-    wire signed [15:0] factor_imag[31:0];
+    wire signed [15:0] factor_real[127:0];
+    wire signed [15:0] factor_imag[127:0];
     
     
     assign factor_real[0] = 16'h2000;
