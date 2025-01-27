@@ -9,3 +9,4 @@
 *.drawio
 *.drawio.bkp
 .vscode/
+netlist/
