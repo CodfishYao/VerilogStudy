@@ -1,5 +1,6 @@
 //参考文献/参考电子文档详见工程说明文件
 module fft_256 (
+    //256点FFT顶层模块
     input clk,//系统时钟
     input rst_n,//复位，低有效
     input inv,//0-FFT，1-IFFT
@@ -608,9 +609,7 @@ module fft_256 (
     );   
 
     assign sop_out = en_ctrl[8];
-
     reg signed [15:0] y_re_out,y_im_out;
-
     always@(y_re_buf[0] or y_im_buf[0]) begin
         if (!inv) begin
             y_re_out = y_re_buf[0];
@@ -620,86 +619,274 @@ module fft_256 (
             y_im_out = (y_re_buf[0] >>> 6);
         end
     end
-
     assign y_re = y_re_out;
     assign y_im = y_im_out;
-
-    // Wnr, multiplied by 0x2000
+    //8192(0x2000)*Wnr, Wnr = exp(-2Pi*j*r/n) = cos(-2Pi*r/n)+jsin(-2Pi*r/n)
+	//r is index, n is N of FFT
     wire signed [15:0] factor_real[127:0];
     wire signed [15:0] factor_imag[127:0];
-    
-    
-    assign factor_real[0] = 16'h2000;
-    assign factor_imag[0] = 16'h0000;
-    assign factor_real[1] = 16'h1FD8;
-    assign factor_imag[1] = 16'hFCDD;
-    assign factor_real[2] = 16'h1F62;
-    assign factor_imag[2] = 16'hF9C1;
-    assign factor_real[3] = 16'h1E9F;
-    assign factor_imag[3] = 16'hF6B5;
-    assign factor_real[4] = 16'h1D90;
-    assign factor_imag[4] = 16'hF3C1;
-    assign factor_real[5] = 16'h1C38;
-    assign factor_imag[5] = 16'hF0EA;
-    assign factor_real[6] = 16'h1A9B;
-    assign factor_imag[6] = 16'hEE38;
-    assign factor_real[7] = 16'h18BC;
-    assign factor_imag[7] = 16'hEBB3;
-    assign factor_real[8] = 16'h16A0;
-    assign factor_imag[8] = 16'hE95F;
-    assign factor_real[9] = 16'h144C;
-    assign factor_imag[9] = 16'hE743;
-    assign factor_real[10] = 16'h11C7;
-    assign factor_imag[10] = 16'hE564;
-    assign factor_real[11] = 16'h0F15;
-    assign factor_imag[11] = 16'hE3C7;
-    assign factor_real[12] = 16'h0C3E;
-    assign factor_imag[12] = 16'hE26F;
-    assign factor_real[13] = 16'h094A;
-    assign factor_imag[13] = 16'hE160;
-    assign factor_real[14] = 16'h063E;
-    assign factor_imag[14] = 16'hE09D;
-    assign factor_real[15] = 16'h0322;
-    assign factor_imag[15] = 16'hE027;
-    assign factor_real[16] = 16'h0000;
-    assign factor_imag[16] = 16'hE000;
-    assign factor_real[17] = 16'hFCDD;
-    assign factor_imag[17] = 16'hE027;
-    assign factor_real[18] = 16'hF9C1;
-    assign factor_imag[18] = 16'hE09D;
-    assign factor_real[19] = 16'hF6B5;
-    assign factor_imag[19] = 16'hE160;
-    assign factor_real[20] = 16'hF3C1;
-    assign factor_imag[20] = 16'hE26F;
-    assign factor_real[21] = 16'hF0EA;
-    assign factor_imag[21] = 16'hE3C7;
-    assign factor_real[22] = 16'hEE38;
-    assign factor_imag[22] = 16'hE564;
-    assign factor_real[23] = 16'hEBB3;
-    assign factor_imag[23] = 16'hE743;
-    assign factor_real[24] = 16'hE95F;
-    assign factor_imag[24] = 16'hE95F;
-    assign factor_real[25] = 16'hE743;
-    assign factor_imag[25] = 16'hEBB3;
-    assign factor_real[26] = 16'hE564;
-    assign factor_imag[26] = 16'hEE38;
-    assign factor_real[27] = 16'hE3C7;
-    assign factor_imag[27] = 16'hF0EA;
-    assign factor_real[28] = 16'hE26F;
-    assign factor_imag[28] = 16'hF3C1;
-    assign factor_real[29] = 16'hE160;
-    assign factor_imag[29] = 16'hF6B5;
-    assign factor_real[30] = 16'hE09D;
-    assign factor_imag[30] = 16'hF9C1;
-    assign factor_real[31] = 16'hE027;
-    assign factor_imag[31] = 16'hFCDD;
+    //旋转因子
+	assign factor_real[0] = 16'h2000;
+	assign factor_imag[0] = 16'h0000;
+	assign factor_real[1] = 16'h1FFD;
+	assign factor_imag[1] = 16'hFF36;
+	assign factor_real[2] = 16'h1FF6;
+	assign factor_imag[2] = 16'hFE6E;
+	assign factor_real[3] = 16'h1FE9;
+	assign factor_imag[3] = 16'hFDA5;
+	assign factor_real[4] = 16'h1FD8;
+	assign factor_imag[4] = 16'hFCDD;
+	assign factor_real[5] = 16'h1FC2;
+	assign factor_imag[5] = 16'hFC15;
+	assign factor_real[6] = 16'h1FA7;
+	assign factor_imag[6] = 16'hFB4D;
+	assign factor_real[7] = 16'h1F87;
+	assign factor_imag[7] = 16'hFA87;
+	assign factor_real[8] = 16'h1F62;
+	assign factor_imag[8] = 16'hF9C1;
+	assign factor_real[9] = 16'h1F38;
+	assign factor_imag[9] = 16'hF8FD;
+	assign factor_real[10] = 16'h1F0A;
+	assign factor_imag[10] = 16'hF839;
+	assign factor_real[11] = 16'h1ED7;
+	assign factor_imag[11] = 16'hF777;
+	assign factor_real[12] = 16'h1E9F;
+	assign factor_imag[12] = 16'hF6B5;
+	assign factor_real[13] = 16'h1E62;
+	assign factor_imag[13] = 16'hF5F6;
+	assign factor_real[14] = 16'h1E21;
+	assign factor_imag[14] = 16'hF538;
+	assign factor_real[15] = 16'h1DDB;
+	assign factor_imag[15] = 16'hF47B;
+	assign factor_real[16] = 16'h1D90;
+	assign factor_imag[16] = 16'hF3C1;
+	assign factor_real[17] = 16'h1D41;
+	assign factor_imag[17] = 16'hF308;
+	assign factor_real[18] = 16'h1CED;
+	assign factor_imag[18] = 16'hF251;
+	assign factor_real[19] = 16'h1C95;
+	assign factor_imag[19] = 16'hF19C;
+	assign factor_real[20] = 16'h1C38;
+	assign factor_imag[20] = 16'hF0EA;
+	assign factor_real[21] = 16'h1BD7;
+	assign factor_imag[21] = 16'hF03A;
+	assign factor_real[22] = 16'h1B72;
+	assign factor_imag[22] = 16'hEF8C;
+	assign factor_real[23] = 16'h1B09;
+	assign factor_imag[23] = 16'hEEE1;
+	assign factor_real[24] = 16'h1A9B;
+	assign factor_imag[24] = 16'hEE38;
+	assign factor_real[25] = 16'h1A29;
+	assign factor_imag[25] = 16'hED92;
+	assign factor_real[26] = 16'h19B3;
+	assign factor_imag[26] = 16'hECF0;
+	assign factor_real[27] = 16'h193A;
+	assign factor_imag[27] = 16'hEC50;
+	assign factor_real[28] = 16'h18BC;
+	assign factor_imag[28] = 16'hEBB3;
+	assign factor_real[29] = 16'h183B;
+	assign factor_imag[29] = 16'hEB19;
+	assign factor_real[30] = 16'h17B5;
+	assign factor_imag[30] = 16'hEA82;
+	assign factor_real[31] = 16'h172D;
+	assign factor_imag[31] = 16'hE9EF;
+	assign factor_real[32] = 16'h16A0;
+	assign factor_imag[32] = 16'hE95F;
+	assign factor_real[33] = 16'h1610;
+	assign factor_imag[33] = 16'hE8D2;
+	assign factor_real[34] = 16'h157D;
+	assign factor_imag[34] = 16'hE84A;
+	assign factor_real[35] = 16'h14E6;
+	assign factor_imag[35] = 16'hE7C4;
+	assign factor_real[36] = 16'h144C;
+	assign factor_imag[36] = 16'hE743;
+	assign factor_real[37] = 16'h13AF;
+	assign factor_imag[37] = 16'hE6C5;
+	assign factor_real[38] = 16'h130F;
+	assign factor_imag[38] = 16'hE64C;
+	assign factor_real[39] = 16'h126D;
+	assign factor_imag[39] = 16'hE5D6;
+	assign factor_real[40] = 16'h11C7;
+	assign factor_imag[40] = 16'hE564;
+	assign factor_real[41] = 16'h111E;
+	assign factor_imag[41] = 16'hE4F6;
+	assign factor_real[42] = 16'h1073;
+	assign factor_imag[42] = 16'hE48D;
+	assign factor_real[43] = 16'h0FC5;
+	assign factor_imag[43] = 16'hE428;
+	assign factor_real[44] = 16'h0F15;
+	assign factor_imag[44] = 16'hE3C7;
+	assign factor_real[45] = 16'h0E63;
+	assign factor_imag[45] = 16'hE36A;
+	assign factor_real[46] = 16'h0DAE;
+	assign factor_imag[46] = 16'hE312;
+	assign factor_real[47] = 16'h0CF7;
+	assign factor_imag[47] = 16'hE2BE;
+	assign factor_real[48] = 16'h0C3E;
+	assign factor_imag[48] = 16'hE26F;
+	assign factor_real[49] = 16'h0B84;
+	assign factor_imag[49] = 16'hE224;
+	assign factor_real[50] = 16'h0AC7;
+	assign factor_imag[50] = 16'hE1DE;
+	assign factor_real[51] = 16'h0A09;
+	assign factor_imag[51] = 16'hE19D;
+	assign factor_real[52] = 16'h094A;
+	assign factor_imag[52] = 16'hE160;
+	assign factor_real[53] = 16'h0888;
+	assign factor_imag[53] = 16'hE128;
+	assign factor_real[54] = 16'h07C6;
+	assign factor_imag[54] = 16'hE0F5;
+	assign factor_real[55] = 16'h0702;
+	assign factor_imag[55] = 16'hE0C7;
+	assign factor_real[56] = 16'h063E;
+	assign factor_imag[56] = 16'hE09D;
+	assign factor_real[57] = 16'h0578;
+	assign factor_imag[57] = 16'hE078;
+	assign factor_real[58] = 16'h04B2;
+	assign factor_imag[58] = 16'hE058;
+	assign factor_real[59] = 16'h03EA;
+	assign factor_imag[59] = 16'hE03D;
+	assign factor_real[60] = 16'h0322;
+	assign factor_imag[60] = 16'hE027;
+	assign factor_real[61] = 16'h025A;
+	assign factor_imag[61] = 16'hE016;
+	assign factor_real[62] = 16'h0191;
+	assign factor_imag[62] = 16'hE009;
+	assign factor_real[63] = 16'h00C9;
+	assign factor_imag[63] = 16'hE002;
+	assign factor_real[64] = 16'h0000;
+	assign factor_imag[64] = 16'hDFFF;
+	assign factor_real[65] = 16'hFF36;
+	assign factor_imag[65] = 16'hE002;
+	assign factor_real[66] = 16'hFE6E;
+	assign factor_imag[66] = 16'hE009;
+	assign factor_real[67] = 16'hFDA5;
+	assign factor_imag[67] = 16'hE016;
+	assign factor_real[68] = 16'hFCDD;
+	assign factor_imag[68] = 16'hE027;
+	assign factor_real[69] = 16'hFC15;
+	assign factor_imag[69] = 16'hE03D;
+	assign factor_real[70] = 16'hFB4D;
+	assign factor_imag[70] = 16'hE058;
+	assign factor_real[71] = 16'hFA87;
+	assign factor_imag[71] = 16'hE078;
+	assign factor_real[72] = 16'hF9C1;
+	assign factor_imag[72] = 16'hE09D;
+	assign factor_real[73] = 16'hF8FD;
+	assign factor_imag[73] = 16'hE0C7;
+	assign factor_real[74] = 16'hF839;
+	assign factor_imag[74] = 16'hE0F5;
+	assign factor_real[75] = 16'hF777;
+	assign factor_imag[75] = 16'hE128;
+	assign factor_real[76] = 16'hF6B5;
+	assign factor_imag[76] = 16'hE160;
+	assign factor_real[77] = 16'hF5F6;
+	assign factor_imag[77] = 16'hE19D;
+	assign factor_real[78] = 16'hF538;
+	assign factor_imag[78] = 16'hE1DE;
+	assign factor_real[79] = 16'hF47B;
+	assign factor_imag[79] = 16'hE224;
+	assign factor_real[80] = 16'hF3C1;
+	assign factor_imag[80] = 16'hE26F;
+	assign factor_real[81] = 16'hF308;
+	assign factor_imag[81] = 16'hE2BE;
+	assign factor_real[82] = 16'hF251;
+	assign factor_imag[82] = 16'hE312;
+	assign factor_real[83] = 16'hF19C;
+	assign factor_imag[83] = 16'hE36A;
+	assign factor_real[84] = 16'hF0EA;
+	assign factor_imag[84] = 16'hE3C7;
+	assign factor_real[85] = 16'hF03A;
+	assign factor_imag[85] = 16'hE428;
+	assign factor_real[86] = 16'hEF8C;
+	assign factor_imag[86] = 16'hE48D;
+	assign factor_real[87] = 16'hEEE1;
+	assign factor_imag[87] = 16'hE4F6;
+	assign factor_real[88] = 16'hEE38;
+	assign factor_imag[88] = 16'hE564;
+	assign factor_real[89] = 16'hED92;
+	assign factor_imag[89] = 16'hE5D6;
+	assign factor_real[90] = 16'hECF0;
+	assign factor_imag[90] = 16'hE64C;
+	assign factor_real[91] = 16'hEC50;
+	assign factor_imag[91] = 16'hE6C5;
+	assign factor_real[92] = 16'hEBB3;
+	assign factor_imag[92] = 16'hE743;
+	assign factor_real[93] = 16'hEB19;
+	assign factor_imag[93] = 16'hE7C4;
+	assign factor_real[94] = 16'hEA82;
+	assign factor_imag[94] = 16'hE84A;
+	assign factor_real[95] = 16'hE9EF;
+	assign factor_imag[95] = 16'hE8D2;
+	assign factor_real[96] = 16'hE95F;
+	assign factor_imag[96] = 16'hE95F;
+	assign factor_real[97] = 16'hE8D2;
+	assign factor_imag[97] = 16'hE9EF;
+	assign factor_real[98] = 16'hE84A;
+	assign factor_imag[98] = 16'hEA82;
+	assign factor_real[99] = 16'hE7C4;
+	assign factor_imag[99] = 16'hEB19;
+	assign factor_real[100] = 16'hE743;
+	assign factor_imag[100] = 16'hEBB3;
+	assign factor_real[101] = 16'hE6C5;
+	assign factor_imag[101] = 16'hEC50;
+	assign factor_real[102] = 16'hE64C;
+	assign factor_imag[102] = 16'hECF0;
+	assign factor_real[103] = 16'hE5D6;
+	assign factor_imag[103] = 16'hED92;
+	assign factor_real[104] = 16'hE564;
+	assign factor_imag[104] = 16'hEE38;
+	assign factor_real[105] = 16'hE4F6;
+	assign factor_imag[105] = 16'hEEE1;
+	assign factor_real[106] = 16'hE48D;
+	assign factor_imag[106] = 16'hEF8C;
+	assign factor_real[107] = 16'hE428;
+	assign factor_imag[107] = 16'hF03A;
+	assign factor_real[108] = 16'hE3C7;
+	assign factor_imag[108] = 16'hF0EA;
+	assign factor_real[109] = 16'hE36A;
+	assign factor_imag[109] = 16'hF19C;
+	assign factor_real[110] = 16'hE312;
+	assign factor_imag[110] = 16'hF251;
+	assign factor_real[111] = 16'hE2BE;
+	assign factor_imag[111] = 16'hF308;
+	assign factor_real[112] = 16'hE26F;
+	assign factor_imag[112] = 16'hF3C1;
+	assign factor_real[113] = 16'hE224;
+	assign factor_imag[113] = 16'hF47B;
+	assign factor_real[114] = 16'hE1DE;
+	assign factor_imag[114] = 16'hF538;
+	assign factor_real[115] = 16'hE19D;
+	assign factor_imag[115] = 16'hF5F6;
+	assign factor_real[116] = 16'hE160;
+	assign factor_imag[116] = 16'hF6B5;
+	assign factor_real[117] = 16'hE128;
+	assign factor_imag[117] = 16'hF777;
+	assign factor_real[118] = 16'hE0F5;
+	assign factor_imag[118] = 16'hF839;
+	assign factor_real[119] = 16'hE0C7;
+	assign factor_imag[119] = 16'hF8FD;
+	assign factor_real[120] = 16'hE09D;
+	assign factor_imag[120] = 16'hF9C1;
+	assign factor_real[121] = 16'hE078;
+	assign factor_imag[121] = 16'hFA87;
+	assign factor_real[122] = 16'hE058;
+	assign factor_imag[122] = 16'hFB4D;
+	assign factor_real[123] = 16'hE03D;
+	assign factor_imag[123] = 16'hFC15;
+	assign factor_real[124] = 16'hE027;
+	assign factor_imag[124] = 16'hFCDD;
+	assign factor_real[125] = 16'hE016;
+	assign factor_imag[125] = 16'hFDA5;
+	assign factor_real[126] = 16'hE009;
+	assign factor_imag[126] = 16'hFE6E;
+	assign factor_real[127] = 16'hE002;
+	assign factor_imag[127] = 16'hFF36;
 
 
-    // butter instantiation
+    //生成蝶形单元
     genvar m,i,j;
-
     generate
-        
         for (m = 0; m <= 7; m=m+1) begin:stage
             for (i = 0; i <= (1<<(7-m))-1 ; i=i+1) begin:group
                 for (j = 0; j <= (1<<m)-1 ; j=j+1) begin:unit
@@ -722,9 +909,7 @@ module fft_256 (
                 end
             end 
         end
-
     endgenerate
-
 endmodule
 
 module counter (
@@ -800,9 +985,8 @@ module counter (
         end
     end
 endmodule
-
-//蝶形单元
 module butterfly (
+    //蝶形单元
     input clk,
     input rst_n,
     input en,
@@ -898,3 +1082,10 @@ module butterfly (
     assign yq_imag = {yq_imag_r[31], yq_imag_r[13+15:13]};
     assign valid = en_r[2];
 endmodule
+/***********ACKNOWLEDGEMENT***********/
+/*               UCAS                */
+/*           www.runoob.com          */
+/*             sasasatori            */
+/* doi.org:10.5573 JSTS.2017.17.1.101*/
+/*************************************/
+//The Last Line
