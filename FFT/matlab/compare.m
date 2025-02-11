@@ -29,19 +29,29 @@ xi =[1i, 2i, 3i, 4i, 5i, 6i, 7i, 8i, 9i, 10i, 11i, 12i, 13i, 14i, 15i, 16i, 17i,
 x = xr + xi;
 xMat = zeros(9,256);
 xMat(1,:) = bitInvert(x);
-for m = 0:7%stage
-    for i = 0:((bitshift(1, 7 - m)) - 1)%group
-        for k = 0:((bitshift(1, m)) - 1)%unit
+%stage,256点数的FFT共8阶
+for m = 0:7
+    %group，每一阶的组数不一样，对于256点FFT，第m阶有2^(7-m)组
+    %对于第m阶，相邻两个组的第一个数据的索引之间的间隔为2^(m+1)
+    %也就是说，在第m阶，每组的第一个数据的索引为i*2^(m+1)
+    %以上所述不包括最后一组，但由于循环的特性，可忽略不计
+    for i = 0:((bitshift(1, 7 - m)) - 1)
+        %unit，每一组内的单元数不一样，第m阶中，各个组内有2^(m)个单元
+        %每个单元中成对的两个数据之间的跨度为2^(m)（如第2阶，0和4是一对）
+        %这里的k表示的是每组内的第几（k）个单元，因此k的大小直接关联Wnr的值（W_{2^(m+1)}^{k}）
+        for k = 0:((bitshift(1, m)) - 1)
             [xMat(m + 2, bitshift(i, m + 1) + k + 1), ...
              xMat(m + 2, bitshift(i, m + 1) + k + bitshift(1, m) + 1)] ...
-            = butterflyUnit(xMat(m + 1, bitshift(i, m + 1) + k + 1),...
+            = butterflyUnit(...
+              xMat(m + 1, bitshift(i, m + 1) + k + 1),...
               xMat(m + 1, bitshift(i, m + 1) + k + bitshift(1, m) + 1),...
-              Wnr(bitshift(1, (7 - m)) * k + 1));
+              Wnr(bitshift(k, 7 - m) + 1));
+              %Wnr(bitshift(1, (7 - m)) * k + 1));
         end
     end
 end
 % fft
-fftMatlab = fft(x);
+fftMatlab = fft(x,256);
 plot(1:256, abs(fftMatlab))
 hold on
 plot(1:256, abs(xMat(9,:)), 'r')
@@ -50,6 +60,8 @@ function [yp, yq] = butterflyUnit(xp, xq, factor)
 %蝶形单元
     yp = floor((xp + xq * factor)/8192);
     yq = floor((xp - xq * factor)/8192);
+%    yp = (xp + xq * factor);
+%    yq = (xp - xq * factor);
 %     yp0 = xp + xq * factor;
 %     yq0 = xp - xq * factor;
 %     if(real(yp0) < 0)
