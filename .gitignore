@@ -8,5 +8,6 @@
 *.ppt
 *.drawio
 *.drawio.bkp
+*.asv
 .vscode/
 netlist/

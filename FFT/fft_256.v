@@ -13,23 +13,24 @@ module fft_256 (
     output [15:0] y_re,//输出数据实部
     output [15:0] y_im//输出数据虚部
 );
-    //根据公式，256点的FFT将分为8层
+    //根据公式Stage = log2(N)，256点的FFT将分为8层
     //输入
     wire signed [15:0] x_re_mat [8:0] [255:0];
     wire signed [15:0] x_im_mat [8:0] [255:0];
-    //缓冲，以便于并行运行
+    //缓冲，以便于并行运行和流水线操作
     //输入
     reg signed [15:0] x_re_buf [255:0];
     reg signed [15:0] x_im_buf [255:0];
     //输出
     reg signed [15:0] y_re_buf [255:0];
     reg signed [15:0] y_im_buf [255:0];
-    // enable control
+    
     wire [8:0] en_ctrl;
-    //par
+    
     parameter NUMBER_OF_TIMES_IN = 9'b011111110;
     parameter NUMBER_OF_TIMES_OUT = 9'b100000000;
     //自然序输入倒位序输出，使得顺序与预期一致
+	//生成代码见附件python代码
     //实部
 	assign x_re_mat[0][0] =  x_re_buf[0];
 	assign x_re_mat[0][1] =  x_re_buf[128];
@@ -556,7 +557,7 @@ module fft_256 (
             end
         end else begin
             //每一个时钟上升沿将数据输入到输入缓冲寄存器
-            //推入
+            //推入，便于流水线操作
             for (k = 0; k <= 254; k = k + 1 ) begin
                 x_re_buf[k+1] <= x_re_buf[k];
                 x_im_buf[k+1] <= x_im_buf[k];
@@ -590,7 +591,7 @@ module fft_256 (
                 y_im_buf[k] <= x_im_mat[8][k];
             end
         end else begin
-            //每一个时钟上升沿将待出数据依次推出（输出）
+            //每一个时钟上升沿将待出数据依次推出（输出），便于流水线操作
             for (k = 0; k<=254; k=k+1 ) begin
                 y_re_buf[k] <= y_re_buf[k+1];
                 y_im_buf[k] <= y_im_buf[k+1];
@@ -625,7 +626,7 @@ module fft_256 (
 	//r is index, n is N of FFT
     wire signed [15:0] factor_real[127:0];
     wire signed [15:0] factor_imag[127:0];
-    //旋转因子
+    //旋转因子，生成代码见附件python代码
 	assign factor_real[0] = 16'h2000;
 	assign factor_imag[0] = 16'h0000;
 	assign factor_real[1] = 16'h1FFD;
@@ -882,14 +883,21 @@ module fft_256 (
 	assign factor_imag[126] = 16'hFE6E;
 	assign factor_real[127] = 16'hE002;
 	assign factor_imag[127] = 16'hFF36;
-
-
     //生成蝶形单元
     genvar m,i,j;
     generate
-        for (m = 0; m <= 7; m=m+1) begin:stage
-            for (i = 0; i <= (1<<(7-m))-1 ; i=i+1) begin:group
-                for (j = 0; j <= (1<<m)-1 ; j=j+1) begin:unit
+		//对于256点FFT，一共8阶，公式见前文注释
+        for (m = 0; m <= 7; m = m + 1) begin:stage
+			//根据阶数的不同分为不同的组，
+			//如m=0时，分为256/2=128组；m=1时，分为256/4=64组
+			//减一是为了对齐Verilog中的数组的下标
+            for (i = 0; i <= (1<<(7-m))-1 ; i = i + 1) begin:group
+				//对于不同阶的不同组，生成特定的蝶形单元
+				//xp_real和xp_imag对应一个数，xq_real和xq_imag对应一个数，
+				//二者是蝶形单元的两个输入
+				//factor_real和factor_imag是旋转因子，根据组的编号和输入数的位置来索引
+				//yp和yq是蝶形单元的两个输出，应输出到下一阶对应的位置（与xp和xq分别对应）
+                for (j = 0; j <= (1<<m)-1 ; j = j + 1) begin:unit
                      butterfly butterfly_u(
                         .clk(clk),
                         .rst_n(rst_n),
@@ -1032,7 +1040,7 @@ module butterfly (
             xq_wnr_real1 <= xq_imag * factor_imag;
             xq_wnr_imag0 <= xq_real * factor_imag;
             xq_wnr_imag1 <= xq_imag * factor_real;
-            //进行背书放大
+            //进行倍数放大
             xp_real_d <= {{4{xp_real[15]}}, xp_real[14:0], 13'b0};
             xp_imag_d <= {{4{xp_imag[15]}}, xp_imag[14:0], 13'b0};
         end

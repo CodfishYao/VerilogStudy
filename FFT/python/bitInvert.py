@@ -27,6 +27,7 @@ pos = 0
 addend = 1
 res_re = "\t//实部\n"
 res_im = "\t//虚部\n"
+res_matlab = ""
 while pos <= maxPOS:
     originBin = bin(pos)[2:].rjust(length,'0') #转换为二进制 去掉“0b” 且补齐
     #print(originBin)
@@ -44,8 +45,9 @@ while pos <= maxPOS:
     #print("assign x_re_mat[0][" + str(pos) + "] =  x_re_buf[" + str(int(outBin,2)) + "];\n")
     res_re = res_re + "\tassign x_re_mat[0][" + str(pos) + "] =  x_re_buf[" + str(int(outBin,2)) + "];\n"
     res_im = res_im + "\tassign x_im_mat[0][" + str(pos) + "] =  x_im_buf[" + str(int(outBin,2)) + "];\n"
+    #res_matlab = res_matlab + "\tres(" + str(pos + 1) + ") =  input(" + str(int(outBin,2) + 1) + ");\n"
     pos = pos + addend
-res = res_re + res_im
+res = res_re + res_im + res_matlab
 #print(res)
 cb.copy(res)
 if(cb.paste() == res):
