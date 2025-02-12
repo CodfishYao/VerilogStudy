@@ -1,73 +1,76 @@
 close all;
 clc;
-% 通过建模，比较设计的VerilogHDL 256N FFT和MATLAB自带的FFT函数之间的差别
-% N = 256
-% 生成Wnr
-ZoomPar = 13;%13 is 8192
-Wnr = zeros(1,128);
-for r = 0:127
-    Wnr_factor = cos(2*pi*r/256) + 1i*sin(-2*pi*r/256);
-    Wnr_integer = round(Wnr_factor*2^(ZoomPar));
-    % 处理实部（补码修正）
-    if real(Wnr_integer) < 0
-        Wnr_real = typecast(int16(real(Wnr_integer)), 'int16');
-    else
-        Wnr_real = real(Wnr_integer);
-    end
-    % 处理虚部（同上）
-    if imag(Wnr_integer) < 0
-        Wnr_imag = typecast(int16(imag(Wnr_integer)), 'int16');
-    else
-        Wnr_imag = imag(Wnr_integer);
-    end
-    %测试打印
-%     if r == 64
-%         Wnr_imag
-%     end
-    Wnr(r+1) = double(Wnr_real) + 1i * double(Wnr_imag);
-end
-xr = 1:256;
-xi = 1i*(1:256);
-%xr = ones(1,256);
-%xi = 1i*ones(1,256);
-x = xr + xi;
-xMat = zeros(9,256);
-% 使用内置函数生成位反转
-xMat(1,:) = x(bitrevorder(0:255)+1);
-%stage,256点数的FFT共8阶
-for m = 0:7
-    %group，每一阶的组数不一样，对于256点FFT，第m阶有2^(7-m)组
-    %对于第m阶，相邻两个组的第一个数据的索引之间的间隔为2^(m+1)
-    %也就是说，在第m阶，每组的第一个数据的索引为i*2^(m+1)
-    %以上所述不包括最后一组，但由于循环的特性，可忽略不计
-    for i = 0:(2^(7-m) - 1)
-        %unit，每一组内的单元数不一样，第m阶中，各个组内有2^(m)个单元
-        %每个单元中成对的两个数据之间的跨度为2^(m)（如第2阶，0和4是一对）
-        %这里的k表示的是每组内的第几（k）个单元，因此k的大小直接关联Wnr的值（W_{2^(m+1)}^{k}）
-        for k = 0:(2^m - 1)
-            [xMat(m + 2, bitshift(i, m + 1) + k + 1), ...
-             xMat(m + 2, bitshift(i, m + 1) + k + bitshift(1, m) + 1)] ...
-            = butterflyUnit(...
-              xMat(m + 1, bitshift(i, m + 1) + k + 1),...
-              xMat(m + 1, bitshift(i, m + 1) + k + bitshift(1, m) + 1),...
-              Wnr(bitshift(k, 7 - m) + 1), ...
-              ZoomPar);
-        end
-    end
-end
+% % 测试一：1-256
+% xr = 1:256;
+% xi = 1i*(1:256);
+% x = xr + xi;
+
+% 采样等参数
+Fs = 1000;                    % 采样频率 (Hz)
+T = 1/Fs;                     % 采样周期 (秒)
+L = 256;                      % 信号长度 (点数)
+t = (0:L-1)*T;                % 时间向量
+
+
+% % 测试二：单个正弦信号
+% f = 50;                       % 频率 (Hz)
+% A = 1;                        % 幅度
+% % 生成正弦信号
+% x = A*sin(2*pi*f*t);
+
+% % 测试三：两个正弦信号混频,含噪声
+% 50 Hz + 120 Hz 正弦波
+S = 0.7*sin(2*pi*50*t) + sin(2*pi*120*t);
+% 添加一些随机噪声到信号中
+x = S + 1*randn(size(t));
+
+% 绘制原始信号
+figure;
+plot(t, x);
+title('原始输入信号');
+xlabel('时间 (秒)');
+ylabel('幅度');
+
 % 绘制结果对比图
 fftMatlab = fft(x,256);
+fftCus = cusFFTModel(x,13);
 figure;
 plot(1:256, abs(fftMatlab), 'k:h', 'DisplayName', 'MatlabFFT');
 hold on;
-plot(1:256, abs(xMat(9,:)), 'm-..', 'DisplayName', 'Verilog256PointFFTModel');
-xlabel('Frequency Index');
-ylabel('Magnitude');
+plot(1:256, abs(fftCus), 'm-..', 'DisplayName', 'CusFFTModel');
+xlabel('频率索引');
+ylabel('幅值');
 legend show;
-title('Comparison of MatlabFFT and Verilog256PointFFTModel Implementations');
+title('幅值频谱(自定义FFT与内置fft比较)');
 grid on;
-function [yp, yq] = butterflyUnit(xp, xq, factor, ZoomPar)
-%蝶形单元
-    yp = round((xp * 2^(ZoomPar) + xq * factor)*(2^(-ZoomPar)));
-    yq = round((xp * 2^(ZoomPar) - xq * factor)*(2^(-ZoomPar)));
-end
+
+% 计算双边频谱P2/P4和单边频谱P1/P3
+% 自带的fft
+P2 = abs(fftMatlab/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+% 自创的FFT
+P4 = abs(fftCus/L);
+P3 = P4(1:L/2+1);
+P3(2:end-1) = 2*P3(2:end-1);
+% 定义频率域f
+f_axis = Fs*(0:(L/2))/L;
+
+% 绘制单边幅值频谱
+figure;
+plot(f_axis, P1, 'k:h', 'DisplayName', 'MatlabFFT');
+hold on;
+plot(f_axis, P3 , 'm-..', 'DisplayName', 'CusFFTModel');
+title('单边幅值频谱(自定义FFT与内置fft比较)');
+xlabel('频率 (Hz)');
+ylabel('|P(f)|');
+legend show;
+grid on;
+
+%绘制误差
+figure;
+plot(f_axis, abs(abs(P1)-abs(P3)));
+title('单边幅值频谱误差(自定义FFT与内置fft比较)');
+xlabel('频率 (Hz)');
+ylabel('|ΔP(f)|');
+mean(abs(abs(P1)-abs(P3)))
