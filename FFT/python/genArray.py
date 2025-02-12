@@ -1,3 +1,4 @@
+#这个代码没啥用，写着玩儿的
 import pandas.io.clipboard as cb
 res1 = "xr = ["
 res2 = "xj =["
