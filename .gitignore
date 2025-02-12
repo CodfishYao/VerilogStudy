@@ -11,3 +11,5 @@
 *.asv
 .vscode/
 netlist/
+icarus/
+test/

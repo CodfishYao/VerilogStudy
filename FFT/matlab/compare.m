@@ -56,6 +56,7 @@ for m = 0:7
     end
 end
 % 绘制结果对比图
+fftMatlab = fft(x,256);
 figure;
 plot(1:256, abs(fftMatlab), 'k:h', 'DisplayName', 'MatlabFFT');
 hold on;
