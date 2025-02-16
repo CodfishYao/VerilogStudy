@@ -563,8 +563,18 @@ module fft_256 (
                 x_re_buf[k+1] <= x_re_buf[k];
                 x_im_buf[k+1] <= x_im_buf[k];
             end
-            x_re_buf[0] <= x_re;
-            x_im_buf[0] <= x_im;
+            if(!inv) begin
+                //FFT
+                x_re_buf[0] <= x_re;
+                x_im_buf[0] <= x_im;
+            end
+            else begin
+                //IFFT
+                x_re_buf[0] <= x_re;
+                x_im_buf[0] <= $signed(x_im)*-1;
+            end
+            //x_re_buf[0] <= x_re;
+            //x_im_buf[0] <= x_im;
         end
     end
     //输入控制
@@ -614,8 +624,10 @@ module fft_256 (
 
     assign sop_out = en_ctrl[8];
     reg signed [15:0] y_re_out,y_im_out;
-    //FFT和IFFT共用结构，若输出IFFT，只需将输出端缓冲内的
-    //数的实部和虚部交换并除以FFT的点数即可
+    //FFT和IFFT共用结构，若输出IFFT，只需将输入输出端缓冲内的数
+    //进行复共轭即可，同时输出要除以2^(m)
+    //输入处理于输出控制处已完成
+    //输出处理
     always@(y_re_buf[0] or y_im_buf[0]) begin
         if (!inv) begin
             //FFT
@@ -624,8 +636,8 @@ module fft_256 (
         end
         else begin
             //IFFT
-            y_re_out = (y_im_buf[0] >>> 8);
-            y_im_out = (y_re_buf[0] >>> 8);
+            y_re_out = (y_re_buf[0] >>> 8);
+            y_im_out = ($signed(y_im_buf[0])*-1 >>> 8);
         end
     end
     assign y_re = -$signed(y_re_out);
@@ -895,7 +907,7 @@ module fft_256 (
     genvar m,i,j;
     generate
         //对于256点FFT，一共8阶，公式见前文注释
-        //对于代码的解释可查阅用于比较的matlab代码"compare.m"第37-46行
+        //对于代码的解释可查阅用于建模的matlab代码"cusFFTModel.m"
         for (m = 0; m <= 7; m = m + 1) begin:stage
             //根据阶数的不同分为不同的组，
             //如m=0时，分为256/2=128组；m=1时，分为256/4=64组
@@ -1120,8 +1132,8 @@ module butterfly (
     assign valid = en_r[2];
 endmodule
 module signed_divider_8192 (
-        input wire [31:0] a,  // 输入 operand A (32-bit signed)
-        output reg [15:0] quotient  // 输出结果 (16-bit signed)
+        input wire [31:0] a,//输入(有符号32位)
+        output reg [15:0] quotient//输出(有符号16位)
     );
     reg [31:0] temp;
     always @(*) begin

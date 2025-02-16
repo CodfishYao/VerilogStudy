@@ -48,8 +48,8 @@ function y = cusFFTModel(x, ZoomPar)
     end
     y = xMat(9, :);
 end
-function [yp, yq] = butterflyUnit(xp, xq, factor, ZoomPar)
+function [yp, yq] = butterflyUnit(xp, xq, Wnr_Zoom, ZoomPar)
     %蝶形单元
-    yp = round((xp * 2 ^ (ZoomPar) + xq * factor) * (2 ^ (-ZoomPar)));
-    yq = round((xp * 2 ^ (ZoomPar) - xq * factor) * (2 ^ (-ZoomPar)));
+    yp = round((xp * 2 ^ (ZoomPar) + xq * Wnr_Zoom) * (2 ^ (-ZoomPar)));
+    yq = round((xp * 2 ^ (ZoomPar) - xq * Wnr_Zoom) * (2 ^ (-ZoomPar)));
 end
